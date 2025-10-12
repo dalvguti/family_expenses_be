@@ -508,9 +508,19 @@ app.use(cors({
 
 ### 4. HTTPS/SSL
 
-- ✅ Install SSL certificate in cPanel
+**Default (Recommended):**
+- ✅ Install SSL certificate in cPanel (AutoSSL/Let's Encrypt)
 - ✅ Force HTTPS in your domain settings
 - ✅ cPanel handles SSL termination automatically
+- ✅ Leave USE_HTTPS=false in environment variables
+
+**Advanced (Direct HTTPS):**
+- ⚠️ Upload SSL certificates to your app folder
+- ⚠️ Set USE_HTTPS=true in environment variables
+- ⚠️ Configure SSL_CERT_PATH and SSL_KEY_PATH
+- ⚠️ Only use if hosting provider requires it
+
+See [HTTPS_CPANEL_GUIDE.md](./HTTPS_CPANEL_GUIDE.md) for detailed HTTPS configuration.
 
 ## Frontend Configuration Update
 

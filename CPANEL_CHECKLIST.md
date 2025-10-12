@@ -31,10 +31,16 @@ In the same Node.js App page, scroll to **Environment variables**:
 - [ ] `DB_USER` = `your_cpanel_db_user` (with cPanel prefix!)
 - [ ] `DB_PASSWORD` = `your_db_password`
 
-**DO NOT SET:**
-- ❌ PORT (cPanel sets this automatically)
-- ❌ USE_HTTPS (cPanel handles SSL)
-- ❌ HTTPS_PORT (not needed)
+**OPTIONAL (HTTPS - usually not needed):**
+- [ ] `USE_HTTPS` = `false` (Leave disabled - cPanel handles SSL by default)
+- [ ] `HTTPS_PORT` = `5443` (Only if using direct HTTPS)
+- [ ] `SSL_CERT_PATH` = `/path/to/cert.crt` (Only if using direct HTTPS)
+- [ ] `SSL_KEY_PATH` = `/path/to/key.key` (Only if using direct HTTPS)
+
+**⚠️ Important:**
+- Most cPanel setups handle SSL at Apache/nginx level - you DON'T need to enable HTTPS in Node.js
+- Only set USE_HTTPS=true if your hosting provider specifically requires it
+- Default is recommended: Let cPanel handle SSL (USE_HTTPS=false or not set)
 
 **Click "Save" after adding all variables**
 
