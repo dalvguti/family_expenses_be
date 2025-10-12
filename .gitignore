@@ -8,3 +8,7 @@ certs/*.crt
 certs/*.key
 certs/*.pem
 
+# cPanel specific
+.cpanel.yml
+.htaccess.backup
+

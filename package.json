@@ -6,12 +6,17 @@
   "type": "commonjs",
   "scripts": {
     "start": "node server.js",
+    "start:cpanel": "node server-cpanel.js",
     "dev": "nodemon server.js",
     "generate-certs": "node generate-certs.js",
     "seed:categories": "node seedCategories.js",
     "seed:users": "node seedUsers.js",
     "seed:all": "node seedUsers.js && node seedCategories.js",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
   },
   "keywords": ["expense", "tracker", "family", "billing"],
   "author": "",
