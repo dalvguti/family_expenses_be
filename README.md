@@ -9,6 +9,8 @@ Backend API for the Family Expense Tracker application built with Node.js, Expre
 - Monthly and yearly reports
 - Statistics and analytics
 - MySQL database with Sequelize ORM
+- HTTPS support with SSL/TLS encryption
+- Category management with status tracking
 
 ## Prerequisites
 
@@ -32,6 +34,10 @@ CREATE DATABASE family_expenses;
 PORT=5000
 NODE_ENV=development
 
+# HTTPS Configuration (Optional)
+USE_HTTPS=false
+HTTPS_PORT=5443
+
 # MySQL Database Configuration
 DB_HOST=localhost
 DB_PORT=3306
@@ -40,7 +46,16 @@ DB_USER=root
 DB_PASSWORD=your_password_here
 ```
 
-4. Start MySQL server:
+4. **(Optional) Enable HTTPS for local development:**
+```bash
+# Generate self-signed certificates
+npm run generate-certs
+
+# Then update .env:
+USE_HTTPS=true
+```
+
+5. Start MySQL server:
 ```bash
 # Windows
 net start MySQL80
@@ -49,7 +64,7 @@ net start MySQL80
 sudo systemctl start mysql
 ```
 
-5. Run the server:
+6. Run the server:
 ```bash
 # Development mode (auto-creates tables)
 npm run dev
@@ -60,9 +75,26 @@ npm start
 
 The server will automatically create the necessary tables on first run.
 
+**Access Points:**
+- HTTP: `http://localhost:5000/api/health`
+- HTTPS (if enabled): `https://localhost:5443/api/health`
+
 ## Database Configuration
 
 ### Environment Variables
+
+#### Server Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PORT` | HTTP server port | `5000` |
+| `NODE_ENV` | Environment mode | `development` |
+| `USE_HTTPS` | Enable HTTPS server | `false` |
+| `HTTPS_PORT` | HTTPS server port | `5443` |
+| `SSL_CERT_PATH` | SSL certificate path | `./certs/server.crt` |
+| `SSL_KEY_PATH` | SSL private key path | `./certs/server.key` |
+
+#### Database Configuration
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -228,8 +260,25 @@ The application uses connection pooling with these settings:
 ```json
 {
   "start": "node server.js",
-  "dev": "nodemon server.js"
+  "dev": "nodemon server.js",
+  "generate-certs": "node generate-certs.js",
+  "seed:categories": "node seedCategories.js",
+  "seed:users": "node seedUsers.js",
+  "seed:all": "node seedUsers.js && node seedCategories.js"
 }
+```
+
+## HTTPS Setup
+
+For detailed HTTPS configuration instructions, see:
+- **Quick Start:** [HTTPS_SETUP_GUIDE.md](./HTTPS_SETUP_GUIDE.md)
+- **Full Documentation:** [ENVIRONMENT_SETUP.md](./ENVIRONMENT_SETUP.md)
+
+**Quick Setup for Development:**
+```bash
+npm run generate-certs
+# Update .env: USE_HTTPS=true
+npm start
 ```
 
 ## License

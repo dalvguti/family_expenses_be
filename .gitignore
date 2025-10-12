@@ -3,3 +3,8 @@ node_modules/
 .DS_Store
 *.log
 
+# SSL Certificates (keep certs directory but ignore certificate files)
+certs/*.crt
+certs/*.key
+certs/*.pem
+

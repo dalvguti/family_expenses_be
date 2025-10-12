@@ -1,0 +1,7 @@
+# This directory stores SSL certificates for HTTPS
+
+DO NOT commit actual certificate files (.crt, .key, .pem) to version control.
+
+To generate self-signed certificates for development:
+npm run generate-certs
+
