@@ -8,6 +8,12 @@ Create a `.env` file in the root of the `marriage_billing_backend` directory wit
 PORT=5000
 NODE_ENV=development
 
+# HTTPS Configuration (Optional)
+USE_HTTPS=false
+HTTPS_PORT=5443
+SSL_CERT_PATH=./certs/server.crt
+SSL_KEY_PATH=./certs/server.key
+
 # MySQL Database Configuration
 DB_HOST=localhost
 DB_PORT=3306
@@ -21,7 +27,7 @@ DB_PASSWORD=your_password_here
 ### PORT
 - **Type:** Number
 - **Default:** 5000
-- **Description:** The port on which the server will run
+- **Description:** The port on which the HTTP server will run
 - **Example:** `PORT=5000`
 
 ### NODE_ENV
@@ -29,6 +35,33 @@ DB_PASSWORD=your_password_here
 - **Default:** development
 - **Options:** `development`, `production`, `test`
 - **Description:** Environment mode for the application
+
+### HTTPS Configuration
+
+#### USE_HTTPS
+- **Type:** Boolean
+- **Default:** false
+- **Description:** Enable/disable HTTPS server
+- **Example:** `USE_HTTPS=true`
+- **Note:** When enabled, both HTTP and HTTPS servers will run simultaneously
+
+#### HTTPS_PORT
+- **Type:** Number
+- **Default:** 5443
+- **Description:** The port on which the HTTPS server will run
+- **Example:** `HTTPS_PORT=5443` or `HTTPS_PORT=443` (requires admin privileges)
+
+#### SSL_CERT_PATH
+- **Type:** String
+- **Default:** `./certs/server.crt`
+- **Description:** Path to SSL certificate file
+- **Example:** `SSL_CERT_PATH=/path/to/certificate.crt`
+
+#### SSL_KEY_PATH
+- **Type:** String
+- **Default:** `./certs/server.key`
+- **Description:** Path to SSL private key file
+- **Example:** `SSL_KEY_PATH=/path/to/private.key`
 
 ### MySQL Configuration
 
@@ -235,6 +268,154 @@ Then update your `.env`:
 DB_USER=family_app
 DB_PASSWORD=secure_password_here
 ```
+
+## HTTPS Setup
+
+### Development Environment (Self-Signed Certificates)
+
+For local development, you can generate self-signed SSL certificates:
+
+```bash
+# Generate self-signed certificates
+npm run generate-certs
+
+# Enable HTTPS in .env
+USE_HTTPS=true
+HTTPS_PORT=5443
+```
+
+**After generating certificates:**
+
+1. Start your server:
+   ```bash
+   npm start
+   ```
+
+2. Access your API:
+   - HTTP: `http://localhost:5000`
+   - HTTPS: `https://localhost:5443`
+
+3. **Browser Security Warning:**
+   - Self-signed certificates will show a security warning
+   - Click "Advanced" → "Proceed to localhost" (safe for development)
+   - This is normal for self-signed certificates
+
+### Production Environment (Valid SSL Certificates)
+
+For production, use certificates from a trusted Certificate Authority (CA):
+
+#### Option A: Let's Encrypt (Free)
+
+```bash
+# Install certbot
+# Ubuntu/Debian
+sudo apt install certbot
+
+# Generate certificate
+sudo certbot certonly --standalone -d yourdomain.com
+
+# Update .env
+USE_HTTPS=true
+HTTPS_PORT=443
+SSL_CERT_PATH=/etc/letsencrypt/live/yourdomain.com/fullchain.pem
+SSL_KEY_PATH=/etc/letsencrypt/live/yourdomain.com/privkey.pem
+```
+
+#### Option B: Cloud Provider Certificates
+
+**AWS Certificate Manager (ACM):**
+- Use with Load Balancer or CloudFront
+- Certificates managed automatically
+- No need to set SSL paths in application
+
+**Cloudflare:**
+- Provides SSL/TLS encryption
+- Set up in Cloudflare dashboard
+- Application can run HTTP behind Cloudflare proxy
+
+**Heroku:**
+- Automatic SSL on paid plans
+- No additional configuration needed
+
+#### Option C: Purchase SSL Certificate
+
+1. Purchase from provider (DigiCert, Comodo, etc.)
+2. Download certificate and private key
+3. Upload to your server
+4. Update .env with file paths
+
+### Certificate File Permissions (Linux/macOS)
+
+```bash
+# Set secure permissions
+chmod 600 /path/to/private.key
+chmod 644 /path/to/certificate.crt
+
+# Ensure proper ownership
+chown root:root /path/to/private.key
+chown root:root /path/to/certificate.crt
+```
+
+### Testing HTTPS Connection
+
+```bash
+# Test HTTPS endpoint
+curl -k https://localhost:5443/api/health
+
+# Expected response:
+# {"status":"OK","message":"Server is running","database":"MySQL","protocol":"https","secure":true}
+```
+
+### HTTPS Best Practices
+
+1. **Never commit certificates to Git:**
+   - Already in `.gitignore`
+   - Keep private keys secret
+
+2. **Use strong encryption:**
+   - Minimum TLS 1.2
+   - RSA 2048-bit or higher
+   - Self-signed: 4096-bit recommended
+
+3. **Certificate renewal:**
+   - Let's Encrypt: Auto-renew every 90 days
+   - Purchased: Renew before expiration
+   - Set up renewal reminders
+
+4. **Redirect HTTP to HTTPS in production:**
+   ```javascript
+   // Add to server.js for production
+   if (process.env.NODE_ENV === 'production') {
+     app.use((req, res, next) => {
+       if (!req.secure) {
+         return res.redirect('https://' + req.headers.host + req.url);
+       }
+       next();
+     });
+   }
+   ```
+
+5. **Use reverse proxy for production:**
+   - Nginx or Apache for SSL termination
+   - Better performance and security
+   - Example Nginx config:
+     ```nginx
+     server {
+       listen 443 ssl;
+       server_name yourdomain.com;
+       
+       ssl_certificate /path/to/cert.crt;
+       ssl_certificate_key /path/to/key.key;
+       
+       location / {
+         proxy_pass http://localhost:5000;
+         proxy_set_header Host $host;
+         proxy_set_header X-Real-IP $remote_addr;
+         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+         proxy_set_header X-Forwarded-Proto $scheme;
+       }
+     }
+     ```
 
 ## Security Best Practices
 
