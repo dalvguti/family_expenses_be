@@ -270,16 +270,28 @@ The application uses connection pooling with these settings:
 
 ## HTTPS Setup
 
-For detailed HTTPS configuration instructions, see:
+### For Local Development
 - **Quick Start:** [HTTPS_SETUP_GUIDE.md](./HTTPS_SETUP_GUIDE.md)
 - **Full Documentation:** [ENVIRONMENT_SETUP.md](./ENVIRONMENT_SETUP.md)
 
-**Quick Setup for Development:**
+**Quick Setup:**
 ```bash
 npm run generate-certs
 # Update .env: USE_HTTPS=true
 npm start
 ```
+
+### For cPanel Deployment
+- **cPanel Guide:** [HTTPS_CPANEL_GUIDE.md](./HTTPS_CPANEL_GUIDE.md)
+- **Note:** Most cPanel setups handle SSL automatically - you typically don't need to enable HTTPS in Node.js
+
+**cPanel HTTPS (usually not needed):**
+```env
+# Leave disabled - cPanel handles SSL
+USE_HTTPS=false
+```
+
+Only enable if your hosting provider specifically requires it.
 
 ## License
 

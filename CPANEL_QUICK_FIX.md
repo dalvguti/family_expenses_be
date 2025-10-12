@@ -22,14 +22,20 @@ Application startup file: server-cpanel.js ✅
 
 In cPanel → Setup Node.js App → Environment variables:
 
-**Remove or don't set:**
+**Remove or don't set (in most cases):**
 ```
-PORT=5000 ❌
-HTTPS_PORT=5443 ❌
-USE_HTTPS=true ❌
+PORT=5000 ❌ (cPanel assigns this)
 ```
 
-**Why?** cPanel automatically assigns a port and handles it via reverse proxy.
+**HTTPS - Usually NOT needed:**
+```
+USE_HTTPS=true ❌ (cPanel handles SSL by default)
+HTTPS_PORT=5443 ❌ (Only if using direct HTTPS)
+```
+
+**Why?** cPanel automatically assigns ports and handles SSL at the Apache/nginx level via reverse proxy.
+
+**⚠️ Exception:** Only enable HTTPS if your hosting provider requires Node.js to handle SSL directly.
 
 ### 3. Set These Environment Variables Only
 
