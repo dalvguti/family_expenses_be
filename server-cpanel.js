@@ -88,12 +88,16 @@ const USE_HTTPS = process.env.USE_HTTPS === 'true';
 // 3. Your hosting provider specifically instructed you to handle SSL in Node.js
 
 // Start HTTP server (required)
-http.createServer(app).listen(PORT, '0.0.0.0', () => {
-  console.log(`HTTP Server is running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'production'}`);
-  console.log(`Database: MySQL`);
-  console.log(`Listening on: 0.0.0.0:${PORT}`);
-});
+try {
+  http.createServer(app).listen(PORT, '0.0.0.0', () => {
+    console.log(`HTTP Server is running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'production'}`);
+    console.log(`Database: MySQL`);
+    console.log(`Listening on: 0.0.0.0:${PORT}`);
+  });
+} catch (error) {
+  console.error('⚠️  Failed to start HTTP server:', error.message);
+}
 
 // Start HTTPS server (optional - usually not needed on cPanel)
 if (USE_HTTPS) {
