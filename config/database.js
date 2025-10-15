@@ -2,12 +2,12 @@ const { Sequelize } = require('sequelize');
 
 // Create Sequelize instance
 const sequelize = new Sequelize(
-  process.env.DB_NAME || 'gutilops_marriage_billing',
-  process.env.DB_USER || 'gutilops_marriage_billing_usr',
-  process.env.DB_PASSWORD || 'rzu{FsmR&2Yy',
+  process.env.DB_NAME || '',
+  process.env.DB_USER || '',
+  process.env.DB_PASSWORD || '',
   {
-    host: process.env.DB_HOST || 'gutilopsa.com',
-    port: process.env.DB_PORT || 3306,
+    host: process.env.DB_HOST || '',
+    port: process.env.DB_PORT || '',
     dialect: 'mysql',
     logging: process.env.NODE_ENV === 'development' ? console.log : false,
     pool: {
