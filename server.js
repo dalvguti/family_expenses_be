@@ -21,11 +21,16 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use('/api/expenses', require('./routes/expenses'));
-app.use('/api/users', require('./routes/users'));
-app.use('/api/reports', require('./routes/reports'));
-app.use('/api/categories', require('./routes/categories'));
+// Auth routes (public)
+app.use('/api/auth', require('./routes/auth'));
+
+// Protected routes (require authentication)
+const { authenticate } = require('./middleware/auth');
+
+app.use('/api/expenses', authenticate, require('./routes/expenses'));
+app.use('/api/users', authenticate, require('./routes/users'));
+app.use('/api/reports', authenticate, require('./routes/reports'));
+app.use('/api/categories', authenticate, require('./routes/categories'));
 
 // Health check route
 app.get('/api/health', (req, res) => {
