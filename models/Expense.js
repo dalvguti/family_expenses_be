@@ -57,6 +57,17 @@ const Expense = sequelize.define('Expense', {
       },
     },
   },
+  transactionType: {
+    type: DataTypes.ENUM('expense', 'earning'),
+    allowNull: false,
+    defaultValue: 'expense',
+    validate: {
+      isIn: {
+        args: [['expense', 'earning']],
+        msg: 'Transaction type must be either expense or earning',
+      },
+    },
+  },
 }, {
   tableName: 'expenses',
   timestamps: true,
@@ -69,6 +80,9 @@ const Expense = sequelize.define('Expense', {
     },
     {
       fields: ['paidBy'],
+    },
+    {
+      fields: ['transactionType'],
     },
   ],
 });

@@ -30,8 +30,8 @@ exports.getMonthlyReport = async (req, res) => {
       order: [['date', 'ASC']],
     });
 
-    // Total and count
-    const totalResult = await Expense.findOne({
+    // Total expenses
+    const totalExpensesResult = await Expense.findOne({
       attributes: [
         [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
         [sequelize.fn('COUNT', sequelize.col('id')), 'count'],
@@ -41,12 +41,29 @@ exports.getMonthlyReport = async (req, res) => {
           [Op.gte]: startDate,
           [Op.lte]: endDate,
         },
+        transactionType: 'expense',
       },
       raw: true,
     });
 
-    // By category
-    const byCategory = await Expense.findAll({
+    // Total earnings
+    const totalEarningsResult = await Expense.findOne({
+      attributes: [
+        [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
+        [sequelize.fn('COUNT', sequelize.col('id')), 'count'],
+      ],
+      where: {
+        date: {
+          [Op.gte]: startDate,
+          [Op.lte]: endDate,
+        },
+        transactionType: 'earning',
+      },
+      raw: true,
+    });
+
+    // Expenses by category
+    const expensesByCategory = await Expense.findAll({
       attributes: [
         'category',
         [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
@@ -57,14 +74,34 @@ exports.getMonthlyReport = async (req, res) => {
           [Op.gte]: startDate,
           [Op.lte]: endDate,
         },
+        transactionType: 'expense',
       },
       group: ['category'],
       order: [[sequelize.fn('SUM', sequelize.col('amount')), 'DESC']],
       raw: true,
     });
 
-    // By person
-    const byPerson = await Expense.findAll({
+    // Earnings by category
+    const earningsByCategory = await Expense.findAll({
+      attributes: [
+        'category',
+        [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
+        [sequelize.fn('COUNT', sequelize.col('id')), 'count'],
+      ],
+      where: {
+        date: {
+          [Op.gte]: startDate,
+          [Op.lte]: endDate,
+        },
+        transactionType: 'earning',
+      },
+      group: ['category'],
+      order: [[sequelize.fn('SUM', sequelize.col('amount')), 'DESC']],
+      raw: true,
+    });
+
+    // By person (expenses)
+    const expensesByPerson = await Expense.findAll({
       attributes: [
         'paidBy',
         [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
@@ -75,23 +112,59 @@ exports.getMonthlyReport = async (req, res) => {
           [Op.gte]: startDate,
           [Op.lte]: endDate,
         },
+        transactionType: 'expense',
       },
       group: ['paidBy'],
       order: [[sequelize.fn('SUM', sequelize.col('amount')), 'DESC']],
       raw: true,
     });
 
+    // By person (earnings)
+    const earningsByPerson = await Expense.findAll({
+      attributes: [
+        'paidBy',
+        [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
+        [sequelize.fn('COUNT', sequelize.col('id')), 'count'],
+      ],
+      where: {
+        date: {
+          [Op.gte]: startDate,
+          [Op.lte]: endDate,
+        },
+        transactionType: 'earning',
+      },
+      group: ['paidBy'],
+      order: [[sequelize.fn('SUM', sequelize.col('amount')), 'DESC']],
+      raw: true,
+    });
+
+    const totalExpenses = parseFloat(totalExpensesResult?.total || 0);
+    const totalEarnings = parseFloat(totalEarningsResult?.total || 0);
+
     res.json({
       success: true,
-      total: parseFloat(totalResult?.total || 0),
-      count: parseInt(totalResult?.count || 0),
-      expenses,
-      byCategory: byCategory.map(cat => ({
+      totalExpenses,
+      totalEarnings,
+      netBalance: totalEarnings - totalExpenses,
+      expenseCount: parseInt(totalExpensesResult?.count || 0),
+      earningCount: parseInt(totalEarningsResult?.count || 0),
+      transactions: expenses,
+      expensesByCategory: expensesByCategory.map(cat => ({
         category: cat.category,
         total: parseFloat(cat.total),
         count: parseInt(cat.count),
       })),
-      byPerson: byPerson.map(person => ({
+      earningsByCategory: earningsByCategory.map(cat => ({
+        category: cat.category,
+        total: parseFloat(cat.total),
+        count: parseInt(cat.count),
+      })),
+      expensesByPerson: expensesByPerson.map(person => ({
+        paidBy: person.paidBy,
+        total: parseFloat(person.total),
+        count: parseInt(person.count),
+      })),
+      earningsByPerson: earningsByPerson.map(person => ({
         paidBy: person.paidBy,
         total: parseFloat(person.total),
         count: parseInt(person.count),
@@ -122,8 +195,8 @@ exports.getYearlyReport = async (req, res) => {
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year, 11, 31, 23, 59, 59);
 
-    // Monthly breakdown
-    const monthlyBreakdown = await Expense.findAll({
+    // Monthly breakdown for expenses
+    const monthlyExpenses = await Expense.findAll({
       attributes: [
         [sequelize.fn('MONTH', sequelize.col('date')), 'month'],
         [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
@@ -134,19 +207,53 @@ exports.getYearlyReport = async (req, res) => {
           [Op.gte]: startDate,
           [Op.lte]: endDate,
         },
+        transactionType: 'expense',
       },
       group: [sequelize.fn('MONTH', sequelize.col('date'))],
       order: [[sequelize.fn('MONTH', sequelize.col('date')), 'ASC']],
       raw: true,
     });
 
+    // Monthly breakdown for earnings
+    const monthlyEarnings = await Expense.findAll({
+      attributes: [
+        [sequelize.fn('MONTH', sequelize.col('date')), 'month'],
+        [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
+        [sequelize.fn('COUNT', sequelize.col('id')), 'count'],
+      ],
+      where: {
+        date: {
+          [Op.gte]: startDate,
+          [Op.lte]: endDate,
+        },
+        transactionType: 'earning',
+      },
+      group: [sequelize.fn('MONTH', sequelize.col('date'))],
+      order: [[sequelize.fn('MONTH', sequelize.col('date')), 'ASC']],
+      raw: true,
+    });
+
+    // Combine monthly data
+    const monthlyBreakdown = [];
+    for (let month = 1; month <= 12; month++) {
+      const expenseData = monthlyExpenses.find(e => parseInt(e.month) === month);
+      const earningData = monthlyEarnings.find(e => parseInt(e.month) === month);
+      const expenses = parseFloat(expenseData?.total || 0);
+      const earnings = parseFloat(earningData?.total || 0);
+      
+      monthlyBreakdown.push({
+        month,
+        expenses,
+        earnings,
+        netBalance: earnings - expenses,
+        expenseCount: parseInt(expenseData?.count || 0),
+        earningCount: parseInt(earningData?.count || 0),
+      });
+    }
+
     res.json({
       success: true,
-      monthlyBreakdown: monthlyBreakdown.map(item => ({
-        month: parseInt(item.month),
-        total: parseFloat(item.total),
-        count: parseInt(item.count),
-      })),
+      monthlyBreakdown,
     });
   } catch (error) {
     res.status(500).json({
