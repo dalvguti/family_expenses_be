@@ -12,6 +12,10 @@
     "seed:categories": "node seedCategories.js",
     "seed:users": "node seedUsers.js",
     "seed:all": "node seedUsers.js && node seedCategories.js",
+    "db:check": "node check-database.js",
+    "db:sync": "node sync-database.js",
+    "db:migrate:auth": "node migrations/add_auth_to_users.js",
+    "db:migrate:transactions": "node migrations/add_transaction_type.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
