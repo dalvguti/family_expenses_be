@@ -7,7 +7,7 @@ const { sequelize } = require('../config/database');
 // @access  Public
 exports.getExpenses = async (req, res) => {
   try {
-    const { category, paidBy, startDate, endDate, limit, sort } = req.query;
+    const { category, paidBy, startDate, endDate, limit, sort, transactionType } = req.query;
     
     // Build filter object
     const where = {};
@@ -18,6 +18,10 @@ exports.getExpenses = async (req, res) => {
     
     if (paidBy) {
       where.paidBy = { [Op.like]: `%${paidBy}%` };
+    }
+    
+    if (transactionType) {
+      where.transactionType = transactionType;
     }
     
     if (startDate || endDate) {
@@ -173,41 +177,92 @@ exports.getExpenseStats = async (req, res) => {
     const currentMonthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     
     // Total expenses
-    const totalResult = await Expense.findOne({
+    const totalExpensesResult = await Expense.findOne({
       attributes: [
         [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
       ],
+      where: { transactionType: 'expense' },
+      raw: true,
+    });
+
+    // Total earnings
+    const totalEarningsResult = await Expense.findOne({
+      attributes: [
+        [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
+      ],
+      where: { transactionType: 'earning' },
       raw: true,
     });
 
     // Current month expenses
-    const currentMonthResult = await Expense.findOne({
+    const currentMonthExpensesResult = await Expense.findOne({
       attributes: [
         [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
       ],
       where: {
         date: { [Op.gte]: currentMonthStart },
+        transactionType: 'expense',
+      },
+      raw: true,
+    });
+
+    // Current month earnings
+    const currentMonthEarningsResult = await Expense.findOne({
+      attributes: [
+        [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
+      ],
+      where: {
+        date: { [Op.gte]: currentMonthStart },
+        transactionType: 'earning',
       },
       raw: true,
     });
 
     // Expenses by category
-    const byCategory = await Expense.findAll({
+    const expensesByCategory = await Expense.findAll({
       attributes: [
         'category',
         [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
         [sequelize.fn('COUNT', sequelize.col('id')), 'count'],
       ],
+      where: { transactionType: 'expense' },
       group: ['category'],
       order: [[sequelize.fn('SUM', sequelize.col('amount')), 'DESC']],
       raw: true,
     });
 
+    // Earnings by category
+    const earningsByCategory = await Expense.findAll({
+      attributes: [
+        'category',
+        [sequelize.fn('SUM', sequelize.col('amount')), 'total'],
+        [sequelize.fn('COUNT', sequelize.col('id')), 'count'],
+      ],
+      where: { transactionType: 'earning' },
+      group: ['category'],
+      order: [[sequelize.fn('SUM', sequelize.col('amount')), 'DESC']],
+      raw: true,
+    });
+
+    const totalExpenses = parseFloat(totalExpensesResult?.total || 0);
+    const totalEarnings = parseFloat(totalEarningsResult?.total || 0);
+    const currentMonthExpenses = parseFloat(currentMonthExpensesResult?.total || 0);
+    const currentMonthEarnings = parseFloat(currentMonthEarningsResult?.total || 0);
+
     res.json({
       success: true,
-      total: parseFloat(totalResult?.total || 0),
-      currentMonth: parseFloat(currentMonthResult?.total || 0),
-      byCategory: byCategory.map(cat => ({
+      totalExpenses,
+      totalEarnings,
+      netBalance: totalEarnings - totalExpenses,
+      currentMonthExpenses,
+      currentMonthEarnings,
+      currentMonthNet: currentMonthEarnings - currentMonthExpenses,
+      expensesByCategory: expensesByCategory.map(cat => ({
+        category: cat.category,
+        total: parseFloat(cat.total),
+        count: parseInt(cat.count),
+      })),
+      earningsByCategory: earningsByCategory.map(cat => ({
         category: cat.category,
         total: parseFloat(cat.total),
         count: parseInt(cat.count),
