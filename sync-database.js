@@ -5,6 +5,9 @@
  * It will create missing tables and columns safely.
  */
 
+// Load environment variables first
+require('dotenv').config();
+
 const { sequelize } = require('./config/database');
 const User = require('./models/User');
 const Category = require('./models/Category');

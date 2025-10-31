@@ -7,6 +7,9 @@
  * Run this script once to update your database schema.
  */
 
+// Load environment variables first
+require('dotenv').config();
+
 const { sequelize } = require('../config/database');
 const bcrypt = require('bcryptjs');
 

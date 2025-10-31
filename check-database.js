@@ -4,6 +4,9 @@
  * This script checks the current database state and identifies any issues.
  */
 
+// Load environment variables first
+require('dotenv').config();
+
 const { sequelize } = require('./config/database');
 
 async function checkDatabase() {
