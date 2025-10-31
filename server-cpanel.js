@@ -7,8 +7,8 @@ const fs = require('fs');
 const path = require('path');
 const { connectDB } = require('./config/database');
 
-// Load environment variables
-dotenv.config();
+// Load .env BEFORE importing anything that reads process.env
+dotenv.config({ path: require('path').join(__dirname, '.env') });
 
 // Initialize Express app
 const app = express();
