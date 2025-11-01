@@ -22,7 +22,12 @@
     "node": ">=14.0.0",
     "npm": ">=6.0.0"
   },
-  "keywords": ["expense", "tracker", "family", "billing"],
+  "keywords": [
+    "expense",
+    "tracker",
+    "family",
+    "billing"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -30,6 +35,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.1",
+    "forever": "^4.0.3",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.11.3",
     "sequelize": "^6.37.5"
