@@ -16,6 +16,7 @@
     "db:sync": "node sync-database.js",
     "db:migrate:auth": "node migrations/add_auth_to_users.js",
     "db:migrate:transactions": "node migrations/add_transaction_type.js",
+    "db:migrate:emoji": "node migrations/fix_emoji_support.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {

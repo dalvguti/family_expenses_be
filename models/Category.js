@@ -35,6 +35,8 @@ const Category = sequelize.define('Category', {
   icon: {
     type: DataTypes.STRING,
     allowNull: true,
+    charset: 'utf8mb4',
+    collate: 'utf8mb4_unicode_ci',
   },
   isActive: {
     type: DataTypes.BOOLEAN,
